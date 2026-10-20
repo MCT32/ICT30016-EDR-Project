@@ -1,0 +1,26 @@
+[Unit]
+Description=JuiceGuard EDR DoS module
+After=network-online.target iptables.service
+Wants=network-online.target
+ 
+[Service]
+Type=simple
+ 
+ExecStart=/usr/bin/python3 -u /opt/edr/dos/juiceguard21.py
+ 
+WorkingDirectory=/opt/edr/dos
+ 
+User=root
+Group=root
+ 
+Restart=always
+RestartSec=5
+ 
+NoNewPrivileges=true
+PrivateTmp=true
+ 
+StandardOutput=journal
+StandardError=journal
+ 
+[Install]
+WantedBy=multi-user.target

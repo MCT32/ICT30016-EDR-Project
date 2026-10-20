@@ -31,7 +31,7 @@ from datetime import datetime
 # ########################
 
 os.makedirs(
-    "/opt/juiceguard",
+    "/opt/edr/dos",
     exist_ok=True
 )
 
@@ -49,15 +49,15 @@ RULE_5_MIN = 1000
 CHAIN_NAME = "JUICEGUARD"
 
 CSV_FILE = (
-    "/opt/juiceguard/blocked_ips.csv"
+    "/opt/edr/dos/blocked_ips.csv"
 )
 
 ALLOWLIST_FILE = (
-    "/opt/juiceguard/allowlist.txt"
+    "/opt/edr/dos/allowlist.txt"
 )
 
 PERMANENT_BLOCKLIST_FILE = (
-    "/opt/juiceguard/permanent_blocklist.txt"
+    "/opt/edr/dos/permanent_blocklist.txt"
 )
 
 PERMANENT_BLOCK_THRESHOLD = 5
