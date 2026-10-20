@@ -1,14 +1,14 @@
 [Unit]
-Description=JuiceGuard Host Protection Service
+Description=JuiceGuard EDR DoS module
 After=network-online.target iptables.service
 Wants=network-online.target
  
 [Service]
 Type=simple
  
-ExecStart=/usr/bin/python3 -u /opt/juiceguard/juiceguard.py
+ExecStart=/usr/bin/python3 -u /opt/edr/dos/juiceguard21.py
  
-WorkingDirectory=/opt/juiceguard
+WorkingDirectory=/opt/edr/dos
  
 User=root
 Group=root
