@@ -1,0 +1,78 @@
+# OS EDR Configuration
+# Each monitor can be enabled/disabled independently.
+
+global:
+  alert_file: "/var/log/os_edr_alerts.log"
+  log_level: "INFO"          # DEBUG, INFO, WARNING, ERROR
+  poll_interval: 2            # seconds between process/network scans
+  baseline_period: 300        # seconds to learn normal behaviour before alerting
+
+process_monitor:
+  enabled: true
+  response_level: 3           # Contain: kill on detection
+  suspicious_parents:
+    - "nginx"
+    - "apache2"
+    - "node"                  # Juice Shop runs on Node
+    - "sshd"
+  suspicious_children:
+    - "bash"
+    - "sh"
+    - "nc"
+    - "ncat"
+    - "python3"
+    - "perl"
+    - "ruby"
+  known_bad_processes:
+    - "mimikatz"
+    - "meterpreter"
+    - "shell"
+  suspicious_ports: [4444, 5555, 1337, 31337]  # Common Metasploit listeners
+
+file_monitor:
+  enabled: true
+  response_level: 3
+  watched_paths:
+    - "/etc/passwd"
+    - "/etc/shadow"
+    - "/etc/sudoers"
+    - "/etc/ssh/sshd_config"
+    - "/bin"
+    - "/usr/bin"
+    - "/tmp"
+  ignore_patterns:
+    - "*.log"
+    - "*.tmp"
+    - "*.swp"
+
+network_monitor:
+  enabled: true
+  response_level: 2           # Alert only by default; contain is risky for network
+  suspicious_outbound_ports: [4444, 5555, 1337, 31337, 8080]
+  allowed_outbound_ips:
+    - "127.0.0.1"
+    - "::1"
+  max_connections_per_process: 50
+  block_duration: 300         # seconds to block an IP (iptables)
+
+log_monitor:
+  enabled: true
+  response_level: 2
+  watched_logs:
+    - "/var/log/auth.log"
+    - "/var/log/syslog"
+  patterns:
+    - name: "ssh_failed_login"
+      regex: "Failed password for .* from (\\S+)"
+      threshold: 5            # 5 failures within threshold_window seconds
+      threshold_window: 60
+    - name: "sudo_abuse"
+      regex: "sudo: .* COMMAND=.*"
+      threshold: 10
+      threshold_window: 120
+    - name: "user_creation"
+      regex: "useradd.*new user"
+      threshold: 1
+    - name: "su_root"
+      regex: "su: .* session opened for user root"
+      threshold: 1
