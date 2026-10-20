@@ -52,6 +52,13 @@ TESTS = [
 
     ("benign control — should NOT be blocked",
      dict(params={"name": "O'Brien"})),
+
+    ("script tag",        dict(params={"q": "<script>alert(1)</script>"})),
+("event handler",      dict(params={"q": "<img src=x onerror=alert(1)>"})),
+("javascript uri",     dict(params={"url": "javascript:alert(document.cookie)"})),
+("entity-encoded",     dict(params={"q": "&#60;script&#62;alert(1)&#60;/script&#62;"})),
+("attribute breakout", dict(params={"name": "x\" onmouseover=\"alert(1)"})),
+("benign — should pass", dict(params={"q": "my favorite subject is <3 coding"})),
 ]
 
 def run():
