@@ -47,16 +47,47 @@ def inspect_request():
     }
     for k, v in request.cookies.items():
         targets[f"cookie:{k}"] = v
-
-    # Scan the raw body so you don't depend on Flask's parsing
-    # (skip multipart to avoid false positives on binary uploads)
     if request.content_length and not (request.mimetype or "").startswith("multipart/"):
         targets["body"] = request.get_data(as_text=True)
 
     for where, value in targets.items():
-        hit = check(value)
+        hit = check(value)       # SQLi
         if hit:
-            return where, hit
+            return where, "sqli:" + hit
+        hit = check_xss(value)   # XSS
+        if hit:
+            return where, "xss:" + hit
+    return None
+
+XSS_PATTERNS = [
+    ("script tag",       r"<\s*script\b"),
+    ("event handler",     r"\bon(?:error|load|click|mouseover|focus|input|change|submit|pointerover)\s*="),
+    ("javascript uri",    r"javascript\s*:"),
+    ("data uri html",     r"data\s*:\s*text/html"),
+    ("img/svg breakout",  r"<\s*(?:img|svg|iframe|object|embed|body|input|marquee)\b[^>]*\b(?:on\w+|src|href)\s*="),
+    ("expression/eval",   r"\bexpression\s*\(|\beval\s*\(|\bFunction\s*\("),
+    ("attribute breakout",r"[\"']\s*>\s*<|[\"']\s*(?:on\w+|style)\s*="),
+    ("tag breakout",      r"<\s*/?\s*(?:script|style|iframe|svg)\b"),
+    ("vbscript uri",      r"vbscript\s*:"),
+    ("css expression/import", r"@import\b|behavior\s*:\s*url\("),
+]
+COMPILED_XSS = [(name, re.compile(p, re.I)) for name, p in XSS_PATTERNS]
+
+def normalize_xss(s: str) -> str:
+    for _ in range(3):
+        decoded = unquote_plus(s)
+        if decoded == s:
+            break
+        s = decoded
+    s = unescape(s)                      # &lt;script&gt; -> <script>
+    s = re.sub(r"\s+", " ", s)
+    return s.lower().strip()
+
+def check_xss(value: str):
+    v = normalize_xss(value)
+    for name, rx in COMPILED_XSS:
+        if rx.search(v):
+            return name
     return None
 
 # Check each request
