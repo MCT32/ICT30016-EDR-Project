@@ -20,6 +20,8 @@ fi
 
 mkdir -p "$DEST"
 
+apt install python3-watchdog python3-psutil python3-yaml python3-flask python3-requests
+
 # Trailing "/." copies contents (including dotfiles) and preserves attributes
 cp -a "$SRC"/. "$DEST"/
 
