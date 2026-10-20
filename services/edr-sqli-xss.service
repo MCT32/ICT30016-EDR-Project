@@ -1,0 +1,26 @@
+[Unit]
+Description=JuiceGuard EDR SQLi XSS module
+After=network-online.target
+Wants=network-online.target
+ 
+[Service]
+Type=simple
+ 
+ExecStart=/usr/bin/python3 -u /opt/edr/sqli_xss/agent.py
+ 
+WorkingDirectory=/opt/edr/sqli_xss
+ 
+User=root
+Group=root
+ 
+Restart=always
+RestartSec=5
+ 
+NoNewPrivileges=true
+PrivateTmp=true
+ 
+StandardOutput=journal
+StandardError=journal
+ 
+[Install]
+WantedBy=multi-user.target
