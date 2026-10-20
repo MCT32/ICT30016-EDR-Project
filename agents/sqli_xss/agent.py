@@ -2,6 +2,7 @@ import re
 from urllib.parse import unquote_plus
 from flask import Flask, request, Response, abort
 import requests
+from html import unescape
 
 app = Flask(__name__)
 TARGET = "http://localhost:3000"
